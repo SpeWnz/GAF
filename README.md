@@ -1,0 +1,1 @@
+NOTE: Firefox webdriver is necessary
