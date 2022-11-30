@@ -1,5 +1,5 @@
 {
-    "webdriverPath":"/home/vboxubuntu20/Documents/webdriver stuff/geckodriver-v0.30.0-linux64/geckodriver",
+    "webdriverPath":"PATH/TO/CHROMIUM/WEB/DRIVER",
     "extensions":"pdf,jpg,jpeg,png,gif,tiff,txt,mp3,mp4,css,js,html,htm,cgi,asp,php,json",
     "targetTags":"a,img,link,figure,video"
 }
