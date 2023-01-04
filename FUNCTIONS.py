@@ -1,17 +1,35 @@
-from concurrent.futures import thread
+
 import requests
 import ZHOR_Modules.nicePrints as np
 import ZHOR_Modules.listUtils as lu
 import threading
 import os
+import jsbeautifier
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 
 from urllib.parse import urlparse
 
 LOCK = threading.Lock()
 
 DOWNLOAD_FOLDER = "TO-BE-SET"
+COOKIE_DICT = None
+
+PROGRAM_VERSION = "3.0"
+def BANNER():
+    
+    print("\n")
+    print("  ██████╗      █████╗     ███████╗")
+    print(" ██╔════╝     ██╔══██╗    ██╔════╝")
+    print(" ██║  ███╗    ███████║    █████╗")
+    print(" ██║   ██║    ██╔══██║    ██╔══╝  ")
+    print(" ╚██████╔╝    ██║  ██║    ██║     ")
+    print("  ╚═════╝     ╚═╝  ╚═╝    ╚═╝     ","\tVersion:",PROGRAM_VERSION)
+    print("\n Grab All (the) Files")
+    
+    
+    print("\n\n\n")
 
 # imposta il nome della dl folder in base all'url
 # https://stackoverflow.com/questions/9626535/get-protocol-host-name-from-url
@@ -26,17 +44,53 @@ def setDLFolder(urlStr: str):
     DOWNLOAD_FOLDER = result.replace("/","_").replace(".","_").replace(":","_")
     os.system("mkdir " + DOWNLOAD_FOLDER)
 
+
+def sanitizeName(resourcePath: str):
+    outputName = resourcePath.split('/')[-1]
+
+    outputName = outputName.split('?')[0]   #fix per url del tipo www.abc.com/image.jpg?id=123
+
+    #altri fix qui
+    # ...
+
+
+    return outputName
+
 # scarica tutti i file presenti dalla lista di link in input
 def downloadFiles(filesList: list):
+
+    #print("COOKIE",COOKIE_DICT)
+
     for item in filesList:
-        name = item.split('/')[-1]
+        name = sanitizeName(item)
 
         LOCK.acquire()
-        np.infoPrint("Download in corso di " + str(item))
+        np.infoPrint("Downloading " + str(item))
         LOCK.release()
+
         
-        r = requests.get(str(item),verify=False)
-        open(DOWNLOAD_FOLDER + "/" + name,'wb').write(r.content)
+        try:
+
+            r = requests.get(str(item),verify=False,cookies=COOKIE_DICT)
+
+            try:
+                open(DOWNLOAD_FOLDER + "/" + name,'wb').write(r.content)
+            except Exception as E:
+                LOCK.acquire()
+                np.errorPrint("Couldn't save " + str(item))
+                if(np.DEBUG):
+                    print(E)
+                LOCK.release()
+                
+        except Exception as E:
+            LOCK.acquire()
+            np.errorPrint("Couldn't download " + str(item))
+            if(np.DEBUG):
+                print(E)
+            LOCK.release()
+
+
+        
 
 # scarica tutti i file presenti dalla lista di link in input (MULTI THREAD)
 def downloadFiles_mt(filesList: list,threadCount: int):
@@ -95,8 +149,63 @@ def filterListByExtention_v3(filesList: list, extension: str):
 
     return filteredList
 
+def filterListBySubstring(fileList: list, substring: str):
+    
+    np.debugPrint("Filtering by substring")
+    temp = []
+    for item in fileList:
+        if substring in item:
+            temp.append(item)
+
+    return temp
+
+    
+
 
 #rimuove tutti i duplicati
 def removeDuplicates(inputList: list):
     temp = list(dict.fromkeys(inputList))
     return temp
+
+# ============================================================================================ UNMINIFY
+
+def unminifyFiles():    
+    downloadedFiles = os.listdir(DOWNLOAD_FOLDER)
+
+    jsFiles = []
+    cssFiles = []
+    #controlla se effettivamente ci sono file js e css
+    for item in downloadedFiles:
+        if (".js" in item[-3:]):
+            jsFiles.append(item)
+
+        if (".css" in item[-4:]):
+            cssFiles.append(item)
+
+    if(len(jsFiles) is 0):
+        print("No Javascript files were fonud.")
+    else:
+        unminifyJSFiles(jsFiles)
+
+    
+    if(len(cssFiles) is 0):
+        print("No CSS files were found.")
+    else:
+        np.errorPrint("unminifyCSSFiles() not implemented")
+
+    
+
+def unminifyJSFiles(inputFiles: list):
+    
+    print("Unminifying Javascript files")
+    for item in inputFiles:
+            print("Unminifying",item,"...",end='')
+
+            res = jsbeautifier.beautify_file(DOWNLOAD_FOLDER + "/" + item)
+            
+            outputPath = DOWNLOAD_FOLDER + "/" +  item + "_UNMINIFIED.js"
+            np.debugPrint(outputPath)
+            with open(outputPath,'w') as f:
+                f.write(res)
+
+            print("Done.")
