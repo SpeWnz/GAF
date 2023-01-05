@@ -1,6 +1,6 @@
 {
-    "firefoxPath":"C:\\Program Files\\Mozilla Firefox\\firefox.exe",
-    "webdriverPath":"C:\\Users\\T480s\\Documents\\webdrivers\\gecko-webdrivers\\0-32-0\\geckodriver.exe",
+    "firefoxPath":"FIREFOX/PATH/HERE",
+    "webdriverPath":"GECKODRIVER/PATH/HERE",
     "extensions":"pdf,jpg,jpeg,png,gif,tiff,txt,mp3,mp4,css,js,html,htm,cgi,asp,php,json",
     "targetTags":"a,img,link,figure,video,script,link"
 }

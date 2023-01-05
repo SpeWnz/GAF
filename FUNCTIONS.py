@@ -5,6 +5,7 @@ import ZHOR_Modules.listUtils as lu
 import threading
 import os
 import jsbeautifier
+import cssbeautifier
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -191,21 +192,55 @@ def unminifyFiles():
     if(len(cssFiles) is 0):
         print("No CSS files were found.")
     else:
-        np.errorPrint("unminifyCSSFiles() not implemented")
+        unminifyCSSFiles(cssFiles)
 
     
 
 def unminifyJSFiles(inputFiles: list):
     
     print("Unminifying Javascript files")
+
     for item in inputFiles:
             print("Unminifying",item,"...",end='')
 
-            res = jsbeautifier.beautify_file(DOWNLOAD_FOLDER + "/" + item)
-            
-            outputPath = DOWNLOAD_FOLDER + "/" +  item + "_UNMINIFIED.js"
-            np.debugPrint(outputPath)
-            with open(outputPath,'w') as f:
-                f.write(res)
+            try:
+                res = jsbeautifier.beautify_file(DOWNLOAD_FOLDER + "/" + item)
+                
+                outputPath = DOWNLOAD_FOLDER + "/" +  item + "_UNMINIFIED.js"
+                np.debugPrint(outputPath)
+                with open(outputPath,'w') as f:
+                    f.write(res)
 
-            print("Done.")
+                print("Done.")
+
+            except Exception as E:
+                print("")
+                np.errorPrint("Couldn't unminify the file {}. Use the debug mode for more information".format(item))
+                if(np.DEBUG):
+                    print(E)
+
+
+
+def unminifyCSSFiles(inputFiles: list):
+    
+    print("Unminifying CSS files")
+
+    for item in inputFiles:
+            print("Unminifying",item,"...",end='')
+
+            try:
+
+                res = cssbeautifier.beautify_file(DOWNLOAD_FOLDER + "/" + item)
+                
+                outputPath = DOWNLOAD_FOLDER + "/" +  item + "_UNMINIFIED.css"
+                np.debugPrint(outputPath)
+                with open(outputPath,'w') as f:
+                    f.write(res)
+
+                print("Done.")
+
+            except Exception as E:
+                print("")
+                np.errorPrint("Couldn't unminify the file {}. Use the debug mode for more information".format(item))
+                if(np.DEBUG):
+                    print(E)
