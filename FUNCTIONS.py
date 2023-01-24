@@ -16,6 +16,7 @@ LOCK = threading.Lock()
 
 DOWNLOAD_FOLDER = "TO-BE-SET"
 COOKIE_DICT = None
+THREADS_JOINED = False
 
 PROGRAM_VERSION = "3.0"
 def BANNER():
@@ -95,6 +96,8 @@ def downloadFiles(filesList: list):
 
 # scarica tutti i file presenti dalla lista di link in input (MULTI THREAD)
 def downloadFiles_mt(filesList: list,threadCount: int):
+    global THREADS_JOINED
+    THREADS_JOINED = False
 
     sublists = lu.splitList(filesList,threadCount)
 
@@ -106,6 +109,16 @@ def downloadFiles_mt(filesList: list,threadCount: int):
 
     for thread in threadList:
         thread.start()
+
+    #aspetta che i thread abbiano finito
+    LOCK.acquire()
+    np.debugPrint('Waiting for threads to finish ...')
+    LOCK.release()
+
+    for thread in threadList:
+        thread.join()
+
+    THREADS_JOINED = True
     
 
 

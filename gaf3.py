@@ -1,11 +1,13 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.by import By
 
 import json
 import os
 import sys
 import argparse
 import requests
+import time
 import ZHOR_Modules.nicePrints as np
 import ZHOR_Modules.listUtils as lu
 import ZHOR_Modules.progressBar as pb
@@ -156,7 +158,8 @@ if (COOKIES):
 np.infoPrint("Gathering tags ... ")
 targetTags = []
 for tag in configData['targetTags'].split(','):
-    targetTags += browser.find_elements_by_tag_name(tag)
+    #targetTags += browser.find_elements_by_tag_name(tag)
+    targetTags += browser.find_elements(By.TAG_NAME,tag)
 
 
 # ========================================================================================
@@ -243,6 +246,11 @@ if(DL is True):
 
     if("-t" in sys.argv):
         FUNCTIONS.downloadFiles_mt(totalFilesList,int(args.t))
+
+
+        while(FUNCTIONS.THREADS_JOINED is False):
+            time.sleep(1)
+
     else:
         FUNCTIONS.downloadFiles(totalFilesList)
 
